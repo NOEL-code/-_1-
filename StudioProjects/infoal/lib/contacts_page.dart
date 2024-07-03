@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:infoal/details_page.dart';
-import 'package:infoal/main.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +37,9 @@ class _ContactsPageState extends State<ContactsPage> {
   void _deleteContact(String group, String name) {
     setState(() {
       widget.contacts[group]!.removeWhere((contact) => contact['name'] == name);
-
+      if (widget.contacts[group]!.isEmpty) {
+        widget.contacts.remove(group);
+      }
     });
     _saveData();
   }
@@ -131,12 +132,12 @@ class _ContactsPageState extends State<ContactsPage> {
           ),
         ),
       ),
-      body: widget.contacts.isNotEmpty // 그룹 정보 및 연락처 띄우기
+      body: widget.contacts.isNotEmpty
           ? ListView.builder(
         itemCount: filteredContacts.length,
         itemBuilder: (context, index) {
-          String group = filteredContacts[index]; // group: 현재 그룹의 이름
-          List<Map<String, dynamic>> groupContacts = widget.contacts[group]!; // groupContacts: 현재 그룹 내 연락처들
+          String group = filteredContacts[index];
+          List<Map<String, dynamic>> groupContacts = widget.contacts[group]!;
           return Padding(
             padding: const EdgeInsets.all(10.0),
             child: Container(
@@ -161,7 +162,7 @@ class _ContactsPageState extends State<ContactsPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(18.0),
-                    child: Row( // 그룹 (상단에 그룹 이름, Icons.photo, Icons.add)
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -192,42 +193,44 @@ class _ContactsPageState extends State<ContactsPage> {
                                       builder: (context, setState) {
                                         return AlertDialog(
                                           title: Text('연락처 추가하기'),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              TextField(
-                                                decoration: InputDecoration(hintText: '이름'),
-                                                onChanged: (value) {
-                                                  name = value;
-                                                },
-                                              ),
-                                              TextField(
-                                                decoration: InputDecoration(hintText: '연락처'),
-                                                keyboardType: TextInputType.number,
-                                                maxLength: 11,
-                                                onChanged: (value) {
-                                                  contact = value;
-                                                },
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Text(
-                                                    '생일: ${DateFormat('yy-MM-dd').format(birthday)}',
-                                                    style: TextStyle(fontSize: 16),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      _selectDate(context, (selectedDate) {
-                                                        setState(() {
-                                                          birthday = selectedDate;
+                                          content: SingleChildScrollView(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextField(
+                                                  decoration: InputDecoration(hintText: '이름'),
+                                                  onChanged: (value) {
+                                                    name = value;
+                                                  },
+                                                ),
+                                                TextField(
+                                                  decoration: InputDecoration(hintText: '연락처'),
+                                                  keyboardType: TextInputType.number,
+                                                  maxLength: 11,
+                                                  onChanged: (value) {
+                                                    contact = value;
+                                                  },
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      '생일: ${DateFormat('yy-MM-dd').format(birthday)}',
+                                                      style: TextStyle(fontSize: 16),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        _selectDate(context, (selectedDate) {
+                                                          setState(() {
+                                                            birthday = selectedDate;
+                                                          });
                                                         });
-                                                      });
-                                                    },
-                                                    child: Text('생일 선택'),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                                      },
+                                                      child: Text('생일 선택'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                           actions: [
                                             TextButton(
@@ -256,7 +259,6 @@ class _ContactsPageState extends State<ContactsPage> {
                                                   return;
                                                 }
 
-                                                Hive_addPerson(name);
                                                 _addNewContact(group, name, _formatPhoneNumber(contact), birthday);
                                                 Navigator.of(context).pop();
                                               },
@@ -289,16 +291,12 @@ class _ContactsPageState extends State<ContactsPage> {
                           MaterialPageRoute(builder: (context) => DetailsPage(contact: contact)),
                         );
                       },
-
                       child: Card(
-                        margin: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: ListTile(
                           leading: Image.asset('assets/images/person.png', height: 40),
                           title: Text(contact['name']),
-                          subtitle: Text(
-                              '${contact['contact']}',
-                            style: TextStyle(fontSize: 12),
-                          ),
+                          subtitle: Text('${contact['contact']}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
