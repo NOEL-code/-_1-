@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import 'main.dart';
+
 class ContactsPage extends StatefulWidget {
   final Map<String, List<Map<String, dynamic>>> contacts;
   final Function(Map<String, dynamic>) onAddContact;
@@ -259,6 +261,7 @@ class _ContactsPageState extends State<ContactsPage> {
                                                   return;
                                                 }
 
+                                                Hive_addPerson(name);
                                                 _addNewContact(group, name, _formatPhoneNumber(contact), birthday);
                                                 Navigator.of(context).pop();
                                               },
