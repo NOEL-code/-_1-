@@ -299,7 +299,10 @@ class _ContactsPageState extends State<ContactsPage> {
                         child: ListTile(
                           leading: Image.asset('assets/images/person.png', height: 40),
                           title: Text(contact['name']),
-                          subtitle: Text('${contact['contact']}'),
+                          subtitle: Text(
+                              '${contact['contact']}',
+                            style: TextStyle(fontSize: 12),
+                          ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
